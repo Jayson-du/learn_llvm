@@ -1,0 +1,61 @@
+@startuml
+
+!include ../../../Resource/plantuml/libs/core.puml
+
+LAYOUT_TOP_DOWN
+
+' 类定义
+enum LegalizeAction {
+  操作合法化枚举
+  ----
+  Legal
+  Promote
+  Expand
+  LibCall
+  Custom
+}
+
+
+
+enum LegalizeTypeAction {
+  类型合法化
+}
+
+class TargetLoweringBase {
+
+}
+
+
+class TargetLowering {
+
+}
+
+class Cpu0TargetLowering {
+  {abstract} + LowerOperation() : SDValue
+  {abstract} + getTargetNodeName() : char *
+  {abstract} + getSetCCResultType() : EVT
+  {abstract} + PerformDAGCombine() : SDValue
+  {abstract} - LowerFormalArguments() : SDValue
+  {abstract} - LowerCall() : SDValue
+  {abstract} - CanLowerReturn() : bool
+  {abstract} - LowerReturn() : SDValue
+  {abstract} - isOffsetFoldingLegal() : bool
+}
+
+class Cpu0CC {
+
+}
+
+' 类关系
+' TargetLowering类型关系
+Generalize(TargetLowering, TargetLoweringBase, up)
+Generalize(Cpu0TargetLowering, TargetLowering, up)
+
+Composition(LegalizeAction, TargetLoweringBase, up)
+Composition(LegalizeAction, TargetLowering, up)
+Composition(LegalizeAction, Cpu0TargetLowering, up)
+
+Composition(Cpu0CC, Cpu0TargetLowering, up)
+
+
+@enduml

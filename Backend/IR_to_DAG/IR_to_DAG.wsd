@@ -1,0 +1,26 @@
+@startuml
+
+!include ../../Resource/plantuml/libs/core.puml
+
+title "IR转换为DAG时序分析图"
+
+autonumber
+skinparam actorStyle awesome
+
+entity llc
+
+participant PassManager
+participant Cpu0ISelDAGToDAGISel
+participant SelectionDAGISel
+participant SelectionDAGBuilder
+
+
+llc                     ->        PassManager     : llc调用注册在Legacy PM中的Pass,执行每个Pass
+
+PassManager             ->        Cpu0ISelDAGToDAGISel
+
+Cpu0ISelDAGToDAGISel    ->        SelectionDAGISel
+
+SelectionDAGISel        ->        SelectionDAGBuilder
+
+@enduml

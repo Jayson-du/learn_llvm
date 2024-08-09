@@ -1,0 +1,62 @@
+@startuml class-relation
+
+' 泛化 类继承
+!procedure Generalize($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction-|> $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure GeneralizeBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 <|-$direction- $e_alias2 : "$e_label"
+!endprocedure
+
+' 实现
+!procedure Realize($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 .$direction.|> $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure RealizeBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 <|.$direction. $e_alias2 : "$e_label"
+!endprocedure
+
+' 聚合
+!procedure Aggregation($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction-o $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure AggregationBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 o-$direction- $e_alias2 : "$e_label"
+!endprocedure
+
+' 组合
+!procedure Composition($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction-* $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure CompositionBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 *-$direction- $e_alias2 : "$e_label"
+!endprocedure
+
+' 依赖
+!procedure Dependency($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 .$direction.> $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure DependencyBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 <.$direction. $e_alias1 : "$e_label"
+!endprocedure
+
+' 关联
+!procedure Association($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction- $e_alias2 : "$e_label"
+!endprocedure
+
+!procedure AssociationBack($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction- $e_alias2 : "$e_label"
+!endprocedure
+
+' 注释连接
+!procedure NOTE_LINEK($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 .$direction. $e_alias2 : "$e_label"
+!endprocedure
+
+@enduml
