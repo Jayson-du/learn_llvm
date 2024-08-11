@@ -2,7 +2,7 @@
 
 [toc]
 
-## 1.lowering简介
+## 1.lowering过程简介
 
 ### 1.1 什么是`lowering`过程
 将输入的<b>IR</b>转换成<b>SelectionDAG</b>的过程被称作lowering, 在lowering之前我们通过<b>IR</b>表示一段程序, 在lowering之后我们使用<b>SelectionDAG</b>来描述同一段程序
@@ -63,3 +63,30 @@ attributes #0 = { noinline nounwind optnone uwtable "frame-pointer"="all" "min-l
 ```
 
 ```
+
+## 2 SelectionDAG简介
+
+SelectionDAG提供了一种代码的抽象表示, 它可以使用自动化技术进行<b><font color=RED>指令选择</font></b>, 它也非常适合CodeGenerator的其他阶段, 特别是指令调度(SelectionDAG与选择后的调度DGA非常相似); 此外, SelectionDAG还提供了一种主机表示, 可以在其中执行各种非常低级(但独立于目标)的优化; 这些优化需要目标架构的支持信息;
+
+SelectionDAG是一个有向无环图, 其节点是该类实例SDNode; SDNode的有效信息是SDNode内部的Opcode, 节点操作码和节点调操作数; <b><font color=RED>include/llvm/CodeGen/ISDOpcode.h</font></b>描述了各种操作节点类型;
+
+SelectionDAG包含两种不同类型的值: 表示数据流的值和表示控制流依赖关系的值;
+
+### 2.1 SelectionDAG指令选择的过程
+
+基于SelectionDAG的指令选择包括以下步骤：
+  * 构建初始DAG: 此阶段执行从输入LLVM代码到非法SelectionDAG的简单转换
+
+  * 优化SelectionDAG: 此阶段对SelectionDAG进行简单的优化以简化它, 并识别支持这些元操作的目标的元指`令
+
+  * 合法化SelectionDAG类型: 此阶段转换SelectionDAG节点以消除目标架构不支持的任何类型
+
+  * 优化SelectionDAG: 运行SelectionDAG优化器来清理类型合法化暴露的冗余
+
+  * 合法化SelectionDAG ops: 此阶段转换SelectionDAG节点以消除目标架构不支持的任何操作
+
+  * 优化SelectionDAG: 运行SelectionDAG优化器以消除合法化引入的低效率
+
+  * 从DAG中选择指令: 目标架构指令选择器将DAG操作与目标指令进行匹配, 此过程将与目标架构无关的DAG作为输入转换为目标架构指令
+
+  * SelectionDAG调度和形成: 最后一个阶段为目标指令DAG中的指令分配线性顺序, 并将它们发送到正在编译的MachineFunction中;
