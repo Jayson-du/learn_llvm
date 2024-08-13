@@ -73,21 +73,16 @@ together {
 ' **********
 
 ' SDNode类关系
-Aggregation(SDUse, SDNode, up)
+Aggregation(SDUse, SDNode, right)
 Link(SDNode, SelectionDAG, up, friend)
 
 Generalize(GlobalAddressSDNode, SDNode, up)
 Generalize(FrameIndexSDNode, SDNode, up)
 Generalize(LifetimesSDNode, SDNode, up)
 Generalize(PseudoProbeSDNode, SDNode, up)
-' GlobalAddressSDNode -left-|>  SDNode
-' FrameIndexSDNode    -left-|>  SDNode
-' LifetimesSDNode     -left-|>  SDNode
-' PseudoProbeSDNode   -left-|>  SDNode
 
-Composition(use_iterator, SDNode, right)
-Link(use_iterator, SDNode, right, friend)
-Aggregation(SDUse, use_iterator, up)
+
+Composition(use_iterator, SDNode, left, frined)
 
 
 ' SDUse类关系
@@ -95,5 +90,7 @@ Composition(SDValue, SDUse, up)
 
 
 ' SDValue类关系
-Aggregation(SDNode, SDValue, down)
+' Aggregation(SDNode, SDValue, right)
+
+
 @enduml
