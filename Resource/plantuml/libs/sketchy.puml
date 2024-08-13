@@ -131,10 +131,10 @@ skinparam shadowing false
     FontStyle bold
   }
   title {
-    FontSize 50
-    ' BorderRoundCorner            8
-    ' BorderThickness              1
-    ' BackgroundColor  $SECONDARY_LIGHT-$SECONDARY
+    FontSize 100
+    BorderRoundCorner            8
+    BorderThickness              1
+    BackgroundColor  $SECONDARY_LIGHT-$SECONDARY
     FontColor $PRIMARY
     ' BorderColor $SECONDARY
   }

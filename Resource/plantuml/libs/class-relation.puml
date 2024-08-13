@@ -59,4 +59,9 @@ $e_alias1 -$direction- $e_alias2 : "$e_label"
 $e_alias1 .$direction. $e_alias2 : "$e_label"
 !endprocedure
 
+' 连接
+!procedure Link($e_alias1, $e_alias2, $direction="", $e_label="")
+$e_alias1 -$direction- $e_alias2 : "$e_label"
+!endprocedure
+
 @enduml

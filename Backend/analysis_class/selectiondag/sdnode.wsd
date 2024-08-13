@@ -1,0 +1,99 @@
+@startuml
+
+!include ../../../Resource/plantuml/libs/core.puml
+
+skinparam groupInheritance 2
+
+title "SDNode分析"
+
+' 类定义
+
+class SelectionDAG {
+
+}
+
+
+class SDNode {
+  - NodeType : int
+  - OperandList : SDUse *
+  - UseList : SDUse *
+  + getOpcode() : unsigned
+  + isTargetOpcode() : bool
+}
+
+class use_iterator {
+  - Op : SDUse *
+  + getUser() : SDUse &
+}
+
+
+class SDUse {
+  - Val: SDValue
+  - User: SDNode
+  - Prev: SDUse **
+  - Next: SDUse *
+}
+
+class SDValue {
+  - Node : SDNode *
+  - ResNo: unsigned
+  + setNode()
+  + getNode()
+  + getResNo()
+}
+
+' struct EVT {
+
+' }
+
+together {
+  class GlobalAddressSDNode {
+
+  }
+
+  class FrameIndexSDNode {
+
+  }
+
+  class LifetimesSDNode {
+
+  }
+
+  class PseudoProbeSDNode {}
+
+  GlobalAddressSDNode .[hidden] FrameIndexSDNode
+  FrameIndexSDNode    .[hidden] LifetimesSDNode
+  LifetimesSDNode     .[hidden] PseudoProbeSDNode
+}
+
+
+
+' **********
+' 类关系
+' **********
+
+' SDNode类关系
+Aggregation(SDUse, SDNode, up)
+Link(SDNode, SelectionDAG, up, friend)
+
+Generalize(GlobalAddressSDNode, SDNode, up)
+Generalize(FrameIndexSDNode, SDNode, up)
+Generalize(LifetimesSDNode, SDNode, up)
+Generalize(PseudoProbeSDNode, SDNode, up)
+' GlobalAddressSDNode -left-|>  SDNode
+' FrameIndexSDNode    -left-|>  SDNode
+' LifetimesSDNode     -left-|>  SDNode
+' PseudoProbeSDNode   -left-|>  SDNode
+
+Composition(use_iterator, SDNode, right)
+Link(use_iterator, SDNode, right, friend)
+Aggregation(SDUse, use_iterator, up)
+
+
+' SDUse类关系
+Composition(SDValue, SDUse, up)
+
+
+' SDValue类关系
+Aggregation(SDNode, SDValue, down)
+@enduml
