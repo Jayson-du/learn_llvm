@@ -1,0 +1,84 @@
+@startuml
+
+!include ../../Resource/plantuml/libs/core.puml
+
+title "IR转换为DAG时序分析图"
+
+autonumber
+skinparam actorStyle awesome
+
+' skinparam backgroundColor #EEEBDC
+' skinparam Handwritten
+
+skinparam sequence {
+
+ArrowColor Black
+ArrowThickness 1
+ArrowFontName Ink Free
+ArrowFontColor #0099ff
+
+' ActorBorderColor DeepSkyBlue
+' LifeLineBorderColor blue
+' LifeLineBackgroundColor #A9DCDF
+
+ParticipantBorderColor DeepSkyBlue
+ParticipantBackgroundColor DodgerBlue
+ParticipantFontName Ink Free
+ParticipantFontSize 14
+
+SequenceBoxFontName Ink Free
+' ParticipantFontColor #A9DCDF
+
+' ActorBackgroundColor aqua
+' ActorFontColor DeepSkyBlue
+' ActorFontSize 17
+' ActorFontName Aapex
+}
+
+entity llc
+
+box "llvm"
+participant TargetMachine
+participant LLVMTargetMachine
+participant TargetPassConfig
+participant SelectionDAGISel
+participant LegacyPM
+participant SelectionDAG
+participant SelectionDAGBuilder
+participant TargetLowering
+end box
+
+box "cpu0ISel"
+participant Cpu0TargetMachine
+participant Cpu0PassConfig
+participant Cpu0DAGToDAGISel
+participant Cpu0TargetLowering
+end box
+
+
+llc                   ->              Cpu0TargetMachine     : getTargetTriple()\n(LLParser.cpp)
+llc                   ->              TargetMachine         : addPassesToEmitFile
+TargetMachine         ->              LLVMTargetMachine     : addPassesToEmitFile\n(llc.cpp)
+LLVMTargetMachine     ->              TargetPassConfig      : addISelPasses\n(TargetPassConfig.cpp)
+TargetPassConfig      ->              TargetPassConfig      : addCoreISelPasses\n(TargetPassConfig.cpp)
+TargetPassConfig      ->              Cpu0PassConfig        : addInstSelector()\n(Cpu0TargetMachine.cpp)
+Cpu0PassConfig        -[#red]>        Cpu0DAGToDAGISel      : <font color=red>创建Cpu0 lowering的Pass</font>
+Cpu0DAGToDAGISel      ->              SelectionDAGISel      : <font color=red>子类构建父类</font>\n<font color=red>(Cpu0ISelDAGToDAG.h)</font>
+SelectionDAGISel      -[#red]>        SelectionDAG          : <font color=red>构建SelectoinDAG</font>\n<font color=red>(SelectionDAG.cpp)</font>
+SelectionDAGISel      ->              SelectionDAGISel      : initializeGCModuleInfoPass
+SelectionDAGISel      ->              SelectionDAGISel      : initializeBranchProbabilityInfoWrapperPassPass
+SelectionDAGISel      ->              SelectionDAGISel      : initializeAAResultsWrapperPassPass
+SelectionDAGISel      ->              SelectionDAGISel      : initializeTargetLibraryInfoWrapperPassPass
+llc                   ->              LegacyPM              : run\n运行刚刚添加的所有的Pass
+LegacyPM              ->              Cpu0DAGToDAGISel      : runOnMachineFunction\n运行Cpu0DAGTODAGISel Pass
+Cpu0DAGToDAGISel      ->              SelectionDAG          : runOnMachineFunction\n子类调用基类的函数
+SelectionDAG          ->              SelectionDAG          : SelectionDAGISel::SelectAllBasicBlocks\n遍历所有的block
+SelectionDAG          ->              SelectionDAG          : SelectionDAGISel::SelectBasicBlocks\n编译一个基础的block
+SelectionDAG          -[#red]->       SelectionDAGBuilder   : <font color=red>visit,</font>\n<font color=red>遍历basic block中的每条指令, 根据指令的Opcode将IR指令转换为DAG</font>,\n<font color=red>SelectionDAGBuilder.cpp</font>
+loop
+  SelectionDAGBuilder   -[#red]->       SelectionDAGBuilder   : <font color=red>visit##OPCODE</font>
+  SelectionDAGBuilder   -[#red]->       SelectionDAG          : <font color=red>获取TargetLowering,</font>\n<font color=red>DAG.getTargetLoweringInfo(),</font><font color=red>SelectionDAGBuilder.cpp</font>
+  SelectionDAG          -[#red]->       TargetLowering        : <font color=red>获取TargetLowering</font>
+  TargetLowering        -[#red]->       Cpu0TargetLowering    : <font color=red>获取目标后端实现的TargetLowering子类</font>\n<font color=red>Cpu0TargetLowering,用Cpu0TargetLowering</font>\n<font color=red>重写的各个Lowering函数, 实现Lowering过程</font>
+end
+@enduml
