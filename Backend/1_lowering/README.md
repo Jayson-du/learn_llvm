@@ -22,7 +22,7 @@ int add(int a, int b) {
 执行:
 <b>_`clang -c ./test.c -emit-llvm -S -o test.ll`_</b>
 
-生成[test.ll](./resource/simple_test/test.ll)
+生成[test.ll](./resource/simple_test/test.ll)如下:
 ``` {.line-numbers}
 ; ModuleID = './test.c'
 source_filename = "./test.c"
@@ -59,10 +59,38 @@ attributes #0 = { noinline nounwind optnone uwtable "frame-pointer"="all" "min-l
 
 执行:
 <b>_`llc -march=cpu0 -filetype=asm test.ll -debug-only=isel -o test.s 2>test.isel`_</b>
-得到指令选择阶段的输出<b>[test.isel](./resource/simple_test/test.isel)</b>
+得到指令选择阶段的输出<b>[test.isel](./resource/simple_test/test.isel)</b>, 截取一小部分如下:
+```
+=== add
+Enabling fast-isel
+Found argument copy elision candidate:   %3 = alloca i32, align 4
+Found argument copy elision candidate:   %4 = alloca i32, align 4
+Initial selection DAG: %bb.0 'add:'
+SelectionDAG has 21 nodes:
+  t0: ch,glue = EntryToken
+  t6: i32 = Constant<0>
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.3)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.4)> t8, t4, FrameIndex:i32<1>, undef:i32
+  t11: i32,ch = load<(dereferenceable load (s32) from %ir.3)> t10, FrameIndex:i32<0>, undef:i32
+  t12: i32,ch = load<(dereferenceable load (s32) from %ir.4)> t10, FrameIndex:i32<1>, undef:i32
+    t15: ch = TokenFactor t11:1, t12:1
+    t13: i32 = add nsw t11, t12
+  t16: ch = store<(store (s32) into %ir.5)> t15, t13, FrameIndex:i32<2>, undef:i32
+    t17: i32,ch = load<(dereferenceable load (s32) from %ir.5)> t16, FrameIndex:i32<2>, undef:i32
+  t19: ch,glue = CopyToReg t16, Register:i32 $v0, t17
+  t20: ch = Cpu0ISD::Ret t19, Register:i32 $v0, t19:1
 ```
 
+执行:
+<b>
 ```
+llc -march=[arch] -filetype=asm -view-dag-combine1-dags ./test.ll -o ./test.s
+```
+</b>
+可以生成combine之前的dot图, 如下图所示:
+![simple_test_combine1](./resource/svg/simple_test_combine1.svg)
 
 ## 2 SelectionDAG简介
 

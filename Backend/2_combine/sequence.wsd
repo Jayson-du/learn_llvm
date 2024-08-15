@@ -1,0 +1,66 @@
+@startuml
+
+!include ../../Resource/plantuml/libs/core.puml
+
+title "DAG combine时序分析"
+
+autonumber
+skinparam actorStyle awesome
+
+skinparam sequence {
+
+ArrowColor Black
+ArrowThickness 1
+ArrowFontName Ink Free
+ArrowFontColor #0099ff
+
+' ActorBorderColor DeepSkyBlue
+' LifeLineBorderColor blue
+' LifeLineBackgroundColor #A9DCDF
+
+ParticipantBorderColor DeepSkyBlue
+ParticipantBackgroundColor DodgerBlue
+ParticipantFontName Ink Free
+ParticipantFontSize 14
+
+SequenceBoxFontName Ink Free
+' ParticipantFontColor #A9DCDF
+
+' ActorBackgroundColor aqua
+' ActorFontColor DeepSkyBlue
+' ActorFontSize 17
+' ActorFontName Aapex
+}
+
+
+entity llc
+
+box "llvm"
+participant SelectionDAGISel
+participant SelectionDAG
+participant DAGCombiner
+end box
+
+box "cpu0ISel"
+participant Cpu0DAGToDAGISel
+participant Cpu0TargetLowering
+end box
+
+llc                   ->              Cpu0DAGToDAGISel      : llc运行Cpu0DAGToDAGISel Pass
+Cpu0DAGToDAGISel      ->              SelectionDAGISel      : 调用基类的<b><font color=red>runOnMachineFunction</font></b>
+SelectionDAGISel      ->              SelectionDAG          : 将IR转为DAG
+loop 指行lowering
+SelectionDAG          ->              SelectionDAG
+SelectionDAG          ->              Cpu0TargetLowering    : 执行与架构相关的lowering过程
+Cpu0TargetLowering    ->              SelectionDAG
+SelectionDAG          ->              SelectionDAG
+end loop
+note over SelectionDAGISel #FFAAAA : 前几步即lowering的过程
+
+SelectionDAG          ->              SelectionDAGISel      : lowering过程结束, 执行combine\n<b><font color=red>CodeGenAndEmitDAG()</font></b>
+SelectionDAGISel      ->              SelectionDAG          : Combine(SelectionDAG::Combine)
+SelectionDAG          ->              DAGCombiner           : <b><font color=red size=20>调用DAGCombiner的Run()函数</font></b>\n<b><font color=red size=20>开始执行combine操作</font></b>
+DAGCombiner           ->              Cpu0TargetLowering    : 通过虚函数获取架构相关的Combine操作, <b><font color=red>preferABDSToABSWithNSW(),</font></b>\n<b><font color=red>(TargetLowering.h)</font></b>
+
+
+@enduml

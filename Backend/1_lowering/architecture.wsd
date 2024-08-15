@@ -1,0 +1,71 @@
+@startuml
+
+!include ../../Resource/plantuml/libs/core.puml
+
+' *****
+' 类声明
+' *****
+class SelectoinDAGISel {
+  <b><font color=red>从IR转为DAG的Pass</font></b>
+}
+
+class SelectionDAG {
+  - TLI : TargetLowering
+  - FLI : FunctionLoweringInfo
+  - EntryNode : SDNode
+  - Root : SDValue
+  - AllNodes : ilist<SDNode>
+}
+
+class SDNode {
+  - NodeType : int16_t
+  - NodeId : int
+  - OperandList : SDUse
+  - ValueList : EVT
+  - UseList : SDUse
+  - NumOperands : unsigned int
+  - NumValues : unsigned short
+  + PersistentId : uint16_t
+}
+
+together {
+
+  class SDValue {
+    - Node : SDNode
+    - ResNo : unsigned
+  }
+
+  class SDUse {
+    Val : SDValue
+    User : SDNode
+    Perv : SDUse **
+    Next : SDUse *
+  }
+
+
+  SDValue -[hidden]- SDUse
+}
+
+' *****
+' 类关系
+' *****
+Aggregation(SelectionDAG, SelectoinDAGISel, up)
+
+Composition(SDNode, SelectionDAG, up)
+
+Aggregation(SDValue, SDNode, left)
+Aggregation(SDUse, SDNode, left)
+
+Association(SDUse, SDValue, up)
+
+
+' *****
+' 注释
+' *****
+note "<b>* TargetLowering负责处</b>\n<b>  理架构相关的lowering</b>\n<b>* FLI负责处理函数调用约定,</b>\n<b>* EntryNode与Root分别指向</b>\n<b>  有向无环图的入口和根节</b>" as note_selectiondag
+
+' 连接注释
+
+note_selectiondag   . SelectionDAG
+
+@enduml
